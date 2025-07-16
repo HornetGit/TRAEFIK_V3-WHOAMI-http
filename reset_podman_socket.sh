@@ -16,7 +16,13 @@ systemctl --user stop podman.socket
 rm -rf /run/user/1001/containers/networks/rootless-netns/
 
 # Now reset (this removes socket config too)
-podman system reset --force
+# ###########################
+# podman system reset --force
+# ###########################
+# VERY IMPORTANT NOTE:
+# if you installed a custom custom runtime configuration, for example if you sat 'crun' from github,
+# this reset would WIPE it OUT, and podman will reset to runc instead.
+# so, use it very carefully, with knowing what you are doing.
 
 # Recreate socket properly
 systemctl --user daemon-reload
