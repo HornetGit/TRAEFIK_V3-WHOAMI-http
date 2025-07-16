@@ -157,15 +157,15 @@ ls -la /run/user/$(id -u)/podman/podman.sock
 *Traefik dashboard showing dashboard home page*
 
 ### Traefik Router
-![Traefik Dashboard](screenshots/traefik_routers.png)
+![Traefik Router](screenshots/traefik_routers.png)
 *Traefik dashboard showing discovered routers*
 
 ### Traefik Middleswares
-![Traefik Dashboard](screenshots/traefik_middlewares.png)
+![Traefik Middlewares](screenshots/traefik_middlewares.png)
 *Traefik dashboard showing middlewares*
 
 ### Traefik Services
-![Traefik Dashboard](screenshots/traefik_services.png)
+![Traefik Services](screenshots/traefik_services.png)
 *Traefik dashboard showing discovered services*
 
 ### Whoami Service Response
