@@ -1,0 +1,81 @@
+# TRAEFIK, WHOAMI http Service balancing
+# CREATED: 14JUL2025
+# OWNER: XCS HornetGit
+# PURPOSE: run a simple service (whoami) and spin it using Traefik. This is only a basic example.
+# VERSION: Podman 5.x, Traefik v3.4.4 or latest
+# NOTE: NEVER EVER do or use this in production
+
+# doc:https://doc.traefik.io/traefik/getting-started/quick-start/
+# prerequisite: start, enable and check the podman socket
+# check and run: ./reset_podman_socket.sh
+
+# setup: sudo nano /etc/hosts
+# 127.0.0.1 whoami.localhost
+
+# run the containers
+# podman-compose --env-file .env -f podman-compose-whoami.yaml up -d
+
+# checking
+# podman ps -a
+# podman logs -f <container_name=traefik_dash or id>
+
+# testing
+# curl -v http://whoami.localhost:8000/
+# curl -v http://localhost:8080/dashboard/
+
+# debugging
+# :-) no need, lol
+  
+services:
+  traefik:
+    image: ${TRAEFIK_VERSION}
+    container_name: "traefik_dash"
+    environment:
+     - TZ=${COMMON_TIME_ZONE}
+    env_file:
+      - .env
+    hostname: 'traefik_host'
+    # either use traefik commands (as below), or set traefik.yml for this static config
+    command:
+      - "--log.level=DEBUG"
+      - "--api.insecure=true" 
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.endpoint=unix:///var/run/docker.sock"
+      - "--entryPoints.web-service.address=:${CONTAINER_WEB_PORT}" 
+   # Note: the entrypoint port MUST match the container port in the mapping
+    ports:
+      - "${HOST_WEB_PORT}:${CONTAINER_WEB_PORT}"          # web whoami service
+      - "${HOST_TRAEFIK_PORT}:${CONTAINER_TRAEFIK_PORT}"  # traefik dashboard
+    volumes:
+      - "${PODMAN_SOCKET}:/var/run/docker.sock:ro"
+    networks:
+      - ${NETWORK_PUBLIC_NAME}
+
+  whoami:
+    image: "traefik/whoami"
+    container_name: "simple-service"
+    hostname: 'whoami_service'
+    environment:
+      - TZ=${COMMON_TIME_ZONE}
+    env_file:
+      - .env
+    labels:
+      # enable traefik in each service where you want to allow traefik auto-discovering
+      - "traefik.enable=true"
+      # HTTP router simple-service
+      - "traefik.http.routers.whoami.rule=Host(`whoami.localhost`)"
+      - "traefik.http.routers.whoami.entrypoints=web-service"
+      - "traefik.docker.network=${NETWORK_PUBLIC_NAME}"
+    networks:
+      - ${NETWORK_PUBLIC_NAME}
+
+networks:
+  # note: network name MUST be same as NETWORK_PUBLIC_NAME
+  proxy_net:
+    driver: bridge
+    name: ${NETWORK_PUBLIC_NAME}
+    ipam:
+      config:
+        - subnet: ${NETWORK_PUBLIC_SUBNET}
+          gateway: ${NETWORK_PUBLIC_GATEWAY}

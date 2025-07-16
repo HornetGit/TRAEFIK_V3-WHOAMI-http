@@ -1,0 +1,13 @@
+.
+├── podman-compose-whoami.yaml
+├── reset_podman_socket.sh
+├── screenshots
+│   ├── api.png
+│   ├── traefik_dashboard.png
+│   ├── traefik_middlewares.png
+│   ├── traefik_routers.png
+│   ├── traefik_services.png
+│   └── whoami.png
+└── tree.txt
+
+2 directories, 9 files
